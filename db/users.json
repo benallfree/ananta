@@ -1,0 +1,21 @@
+{
+  "ToCountry": "US",
+  "ToState": "AL",
+  "SmsMessageSid": "SM80bd8685a512bd08e32a6db8f521e0af",
+  "NumMedia": "0",
+  "ToCity": "",
+  "FromZip": "93103",
+  "SmsSid": "SM80bd8685a512bd08e32a6db8f521e0af",
+  "FromState": "CA",
+  "SmsStatus": "received",
+  "FromCity": "SANTA BARBARA",
+  "Body": "G",
+  "FromCountry": "US",
+  "To": "+19384448608",
+  "ToZip": "",
+  "MessageSid": "SM80bd8685a512bd08e32a6db8f521e0af",
+  "AccountSid": "AC353729cd88d94e749b60d74a1dafc833",
+  "From": "+18054032380",
+  "ApiVersion": "2010-04-01",
+  "_id": "NiAZ8ulBmxc6nlDR"
+}

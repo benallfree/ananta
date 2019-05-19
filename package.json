@@ -3,8 +3,31 @@
   "version": "0.0.1",
   "description": "High tech coaching with a human touch.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve:tunnel": "lt --port 3000 --subdomain coachbot",
+    "serve": "nodemon --watch src --exec babel-node src/server.js",
+    "test": "jest"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.4.4",
+    "babel-jest": "^24.8.0",
+    "eslint": "^5.16.0",
+    "eslint-plugin-jest": "^22.5.1",
+    "jest": "^24.8.0",
+    "localtunnel": "^1.9.1",
+    "nodemon": "^1.19.0",
+    "prettier": "^1.17.1"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.0",
+    "nedb": "^1.8.0",
+    "nedb-promise": "^2.0.1",
+    "node-nlp": "^3.1.1",
+    "twilio": "^3.31.0"
+  }
 }
