@@ -11,8 +11,9 @@ test('It should receive a new user message', async () => {
   const cb = new Coachbot()
   const m = new Message({ from: 'a', to: 'b', text: 'test' })
   await cb.processInboundMessage(m)
-  expect(User.findOne({ number: 'a' })).resolves.toMatchObject({ number: 'a' })
-  expect(Message.findOne({ from: 'a' })).resolves.toMatchObject({
+  const u = await User.findOne({ number: 'a' })
+  expect(u).toMatchObject({ number: 'a' })
+  expect(Message.findOne({ userId: u._id })).resolves.toMatchObject({
     text: 'test'
   })
 })

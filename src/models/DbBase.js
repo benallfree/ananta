@@ -18,6 +18,7 @@ class DbBase {
     if (!obj) {
       obj = await this.create(create || search)
     }
+    console.log({ obj })
     return obj
   }
 
@@ -37,11 +38,17 @@ class DbBase {
     return new this(obj)
   }
 
+  async update(atts = {}) {
+    _.extend(this.attrs, atts)
+    console.log(this)
+    return this.save()
+  }
+
   async save() {
     if (this.attrs._id) {
       return this.constructor
         .getCollectionRef()
-        .update({ _id: this.attrs.id }, { $set: this.attrs })
+        .update({ _id: this.attrs._id }, { $set: this.attrs })
     } else {
       return this.constructor.getCollectionRef().insert(this.attrs)
     }
