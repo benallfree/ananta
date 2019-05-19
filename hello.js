@@ -9,6 +9,4 @@ var client = new twilio(accountSid, authToken)
     to: '+19384448608', // Text this number
     from: '+19384448608' // From a valid Twilio number
   })
-
-  console.log({ message })
 })()

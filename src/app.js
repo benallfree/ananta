@@ -29,7 +29,6 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
   const ret = await cb.processInboundMessage(m)
 
   const { to, from, text } = ret.attrs
-  console.log({ ret })
   client.messages.create({
     body: text,
     to,

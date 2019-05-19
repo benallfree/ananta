@@ -18,7 +18,6 @@ class DbBase {
     if (!obj) {
       obj = await this.create(create || search)
     }
-    console.log({ obj })
     return obj
   }
 
@@ -40,7 +39,6 @@ class DbBase {
 
   async update(atts = {}) {
     _.extend(this.attrs, atts)
-    console.log(this)
     return this.save()
   }
 
