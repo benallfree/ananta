@@ -1,19 +1,33 @@
 import _ from 'lodash'
+import { camelize, pluralize } from 'inflection'
+import datastore from 'nedb-promise'
+
+const dataStores = {}
 
 class DbBase {
   static getTableName() {
-    throw new Error('must override')
+    return pluralize(camelize(this.name, true))
+  }
+
+  static getDataStoreFileName(collectionName) {
+    return `db/${process.env.NODE_ENV}/${collectionName}`
   }
 
   static getCollectionRef() {
-    return this.dbConnection[this.getTableName()]
+    const collectionName = this.getTableName()
+    if (dataStores[collectionName]) return dataStores[collectionName]
+    dataStores[collectionName] = datastore({
+      filename: this.getDataStoreFileName(collectionName),
+      autoload: true
+    })
+    return dataStores[collectionName]
   }
 
   static async findOne(search) {
     return this.getCollectionRef().findOne(search)
   }
 
-  static async findOrCreate(search, create = null) {
+  static async findOrCreateOne(search, create = null) {
     let obj = await this.findOne(search)
     if (!obj) {
       obj = await this.create(create || search)
@@ -26,7 +40,8 @@ class DbBase {
   }
 
   constructor(attrs = {}) {
-    this.attrs = _.extend(
+    _.extend(
+      this,
       { createdAt: new Date().getTime(), updatedAt: new Date().getTime() },
       attrs
     )
@@ -38,18 +53,22 @@ class DbBase {
   }
 
   async update(atts = {}) {
-    _.extend(this.attrs, atts)
+    _.extend(this, atts)
     return this.save()
   }
 
   async save() {
-    if (this.attrs._id) {
+    if (this._id) {
       return this.constructor
         .getCollectionRef()
-        .update({ _id: this.attrs._id }, { $set: this.attrs })
+        .update({ _id: this._id }, { $set: this.getAttrs() })
     } else {
-      return this.constructor.getCollectionRef().insert(this.attrs)
+      return this.constructor.getCollectionRef().insert(this.getAttrs())
     }
+  }
+
+  getAttrs() {
+    return { ...this }
   }
 }
 

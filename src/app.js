@@ -1,11 +1,8 @@
-import db from './db'
-import { DbBase, Message } from './models'
+import { Message } from './models'
 import { Coachbot } from './Coachbot'
 import express from 'express'
 import bodyParser from 'body-parser'
 import twilio from 'twilio'
-
-DbBase.dbConnection = db
 
 const app = express()
 
@@ -28,7 +25,7 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
 
   const ret = await cb.processInboundMessage(m)
 
-  const { to, from, text } = ret.attrs
+  const { to, from, text } = ret
   client.messages.create({
     body: text,
     to,

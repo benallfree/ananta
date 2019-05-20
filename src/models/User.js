@@ -1,9 +1,5 @@
 import { DbBase } from './DbBase'
 
-class User extends DbBase {
-  static getTableName() {
-    return 'users'
-  }
-}
+class User extends DbBase {}
 
 export { User }
