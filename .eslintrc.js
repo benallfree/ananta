@@ -5,7 +5,7 @@ module.exports = {
     'jest/globals': true
   },
   plugins: ['jest'],
-  extends: 'eslint:recommended',
+  extends: ['eslint:recommended', 'plugin:react/recommended'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly'
@@ -15,6 +15,7 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    'no-console': 0
+    'no-console': 0,
+    'react/react-in-jsx-scope': 0
   }
 }

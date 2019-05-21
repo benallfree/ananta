@@ -1,5 +1,5 @@
 import { Engine } from '../Engine'
-import { Message, User, Track } from '../models'
+import { Message, User, Track } from './models'
 
 const TO = '+19384448608'
 
