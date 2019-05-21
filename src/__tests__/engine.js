@@ -1,9 +1,9 @@
-import { Coachbot } from '../Coachbot'
+import { Engine } from '../Engine'
 import { Message, User, Track } from '../models'
 
 const TO = '+19384448608'
 
-const cb = new Coachbot()
+const cb = new Engine()
 
 describe('basic user tests', () => {
   beforeEach(async () => {

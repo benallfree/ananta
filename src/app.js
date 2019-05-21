@@ -1,5 +1,5 @@
 import { Message } from './models'
-import { Coachbot } from './Coachbot'
+import { Engine } from './Engine'
 import express from 'express'
 import bodyParser from 'body-parser'
 import twilio from 'twilio'
@@ -13,7 +13,7 @@ const client = new twilio(
   '8fbaea745453a8dc2634d3b20a0e745e'
 )
 
-const cb = new Coachbot()
+const cb = new Engine()
 
 app.post('/v1/twilio/sms/inbound', async (req, res) => {
   console.log('Incoming text', { ...req.body })

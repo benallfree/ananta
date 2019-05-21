@@ -2,7 +2,7 @@ import { User, Track } from './models'
 
 let state = 0
 
-class Coachbot {
+class Engine {
   async processInboundMessage(inboundMessage) {
     const { to, from, text } = inboundMessage
     const t = await Track.findOne({ number: to })
@@ -68,4 +68,4 @@ class Coachbot {
   }
 }
 
-export { Coachbot }
+export { Engine }
