@@ -3,14 +3,15 @@ import { Engine } from './Engine'
 import express from 'express'
 import bodyParser from 'body-parser'
 import twilio from 'twilio'
+require('dotenv').config()
 
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: false }))
 
 const client = new twilio(
-  'AC353729cd88d94e749b60d74a1dafc833',
-  '8fbaea745453a8dc2634d3b20a0e745e'
+  process.env.TWILIO_API_KEY,
+  process.env.TWILIO_API_SECRET
 )
 
 const cb = new Engine()
