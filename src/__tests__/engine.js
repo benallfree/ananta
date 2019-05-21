@@ -41,7 +41,7 @@ describe('basic user tests', () => {
     const m = new Message({
       to: TO,
       from: 'a',
-      text: 'help'
+      text: 'helpme'
     })
     await cb.processInboundMessage(m)
     const r = await Message.findOne({ to: 'a', from: TO })

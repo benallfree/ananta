@@ -18,7 +18,6 @@ class Engine {
       )
     }
 
-    console.log('State is', { state })
     switch (state) {
       case 0:
         if (text.match(/helpme/i)) {
