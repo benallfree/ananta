@@ -1,22 +1,30 @@
-import express from 'express'
-import bodyParser from 'body-parser'
+const app = require('express')()
+const server = require('http').Server(app)
+const io = require('socket.io')(server)
+const next = require('next')
 import twilio from 'twilio'
 import { config } from 'dotenv'
-import next from 'next'
+import bodyParser from 'body-parser'
 import { Engine } from './Engine'
 import { Message } from './Engine/models'
 
 config()
 
-const port = parseInt(process.env.PORT, 10) || 3000
 const dev = process.env.NODE_ENV !== 'production'
-const app = next({ dev })
-const handle = app.getRequestHandler()
+const nextApp = next({ dev })
+const nextHandler = nextApp.getRequestHandler()
 
-app.prepare().then(() => {
-  const server = express()
+const messages = []
+// socket.io server
+io.on('connection', socket => {
+  socket.on('message', data => {
+    messages.push(data)
+    socket.broadcast.emit('message', data)
+  })
+})
 
-  server.use(bodyParser.urlencoded({ extended: false }))
+nextApp.prepare().then(() => {
+  app.use(bodyParser.urlencoded({ extended: false }))
 
   const client = new twilio(
     process.env.TWILIO_API_KEY,
@@ -25,7 +33,7 @@ app.prepare().then(() => {
 
   const cb = new Engine()
 
-  server.post('/v1/twilio/sms/inbound', async (req, res) => {
+  app.post('/v1/twilio/sms/inbound', async (req, res) => {
     console.log('Incoming text', { ...req.body })
     const { From, To, Body } = req.body
     const m = new Message({
@@ -47,12 +55,13 @@ app.prepare().then(() => {
     res.end()
   })
 
-  server.get('*', (req, res) => {
-    return handle(req, res)
+  app.get('*', (req, res) => {
+    return nextHandler(req, res)
   })
 
+  const port = parseInt(process.env.PORT, 10) || 3000
   server.listen(port, err => {
     if (err) throw err
-    console.log(`> Ready on http://localhost:${port}`)
+    console.log('> Ready on http://localhost:3000')
   })
 })
