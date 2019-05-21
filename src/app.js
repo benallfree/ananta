@@ -16,6 +16,7 @@ const client = new twilio(
 const cb = new Coachbot()
 
 app.post('/v1/twilio/sms/inbound', async (req, res) => {
+  console.log('Incoming text', { ...req.body })
   const { From, To, Body } = req.body
   const m = new Message({
     to: To,
