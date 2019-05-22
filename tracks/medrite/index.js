@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 module.exports = {
   slug: 'medrite',
   name: 'Med+Rite',
@@ -7,21 +9,22 @@ module.exports = {
     root: {
       prompt:
         'Welcome to Med+Rite, my name is Sasha. I have your eBook on how to avoid Medicare penalties is ready to go, may I have your email address?',
-      run: async ({ text, say, intent }) => {
-        switch (intent) {
-          case 'look':
-            say(
-              'You gaze upon the oracle Anata. She is hovering 6 inches above the ground.'
-            )
-            break
-          case 'attack':
-            say("You can't attack Anata, loser.")
-            break
+      noop: 'Please provide a valid email address (you@company.com).',
+      run: async ({ text, say, ai, goto, entities, profile, sendEmail }) => {
+        const { email } = entities
+        if (email) {
+          profile.email = email
+          sendEmail(email, `Med+Rite eBook`, `Here is your free eBook`)
+          goto('sent')
         }
       },
-      intents: {
-        attack: ['punch her', 'attack her', 'shoot her'],
-        look: ['look around', 'look', 'search around']
+      routes: {
+        sent: {
+          prompt: ({ profile }) =>
+            `Great, I've sent the eBook to ${
+              profile.email
+            }. You can also view it at https://medrite.com/ebook. I would like to point you to a couple videos as well, can I get your date of birth so I can choose the right ones?`
+        }
       }
     }
   }

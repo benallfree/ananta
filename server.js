@@ -25,7 +25,8 @@ const messages = []
 // socket.io server
 io.on('connection', socket => {
   socket.on('message', async message => {
-    const track = await Track.findOne({ slug: 'anata' })
+    const track = await Track.findOne({ slug: 'medrite' })
+    console.log({ track })
     const user = await User.findOrCreateOne({
       number: '+18054032380',
       language: 'en'

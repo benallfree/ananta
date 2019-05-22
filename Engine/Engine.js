@@ -4,6 +4,26 @@ import { User, Track, UserState, Message } from './models'
 const { NlpManager } = require('node-nlp')
 
 class Engine {
+  getRoute(trackConfig, routePath) {
+    console.log({ trackConfig, routePath })
+    const route = _.reduce(
+      _.compact(routePath.split('/')),
+      (carry, s) => (carry.routes && carry.routes[s]) || carry,
+      trackConfig
+    )
+
+    if (!(route.run instanceof Function)) {
+      route.run = () => {}
+    }
+
+    if (!(route.prompt instanceof Function)) {
+      const oldPrompt = route.prompt
+      route.prompt = () => oldPrompt
+    }
+
+    return route
+  }
+
   async processInboundMessage(inboundMessage) {
     const { to, from, text } = inboundMessage
 
@@ -35,56 +55,72 @@ class Engine {
       let trackConfig = null
       try {
         trackConfig = require(trackPath)
-      } catch (e) {}
+      } catch (e) {
+        console.log(e.toString())
+      }
       if (!trackConfig) {
         throw 'Oops! This number is not functioning, but should be. Please contact support.'
       }
 
       let userState = await UserState.findOne({ userId: u._id, trackId: t._id })
       if (userState) {
-        let currentState = _.reduce(
-          _.compact(userState.route.split('/')),
-          (carry, s) => (carry.routes && carry.routes[s]) || carry,
-          trackConfig
-        )
+        save.push(userState)
+        const currentRoute = this.getRoute(trackConfig, userState.route)
 
         const chunks = []
         function say(text) {
           chunks.push(text)
         }
 
-        let nextRoute = userState.route
+        let nextRoutePath = userState.route
         function goto(newRoute) {
-          nextRoute = path.join(userState.route, newRoute)
+          nextRoutePath = path.join(userState.route, newRoute)
         }
 
-        if (!currentState.nlpManager) {
+        function sendEmail(to, subject, body) {
+          console.log('email noop')
+        }
+
+        if (!currentRoute.nlpManager) {
           const manager = new NlpManager({ languages: ['en'] })
-          _.each(currentState.intents, (trainingSet, intentName) =>
+          _.each(currentRoute.intents, (trainingSet, intentName) =>
             _.each(trainingSet, trainingText =>
               manager.addDocument('en', trainingText, intentName)
             )
           )
           await manager.train()
           await manager.save()
-          currentState.nlpManager = manager
+          currentRoute.nlpManager = manager
         }
-        const { intent } = await currentState.nlpManager.process(text)
-        await currentState.run({ text, say, goto, intent })
+        const ai = await currentRoute.nlpManager.process(text)
+
+        const entities = {}
+        _.each(ai.entities, e => {
+          const { entity, sourceText } = e
+          if (entity === 'email') {
+            entities.email = sourceText
+          }
+        })
+
+        await currentRoute.run({
+          text,
+          say,
+          goto,
+          entities,
+          intent: ai.intent,
+          sendEmail,
+          profile: userState.profile
+        })
 
         if (chunks.length === 0)
           chunks.push(
-            currentState.noop || trackConfig.noop || 'Nothing happened.'
+            currentRoute.noop || trackConfig.noop || 'Nothing happened.'
           )
 
-        const nextState = _.reduce(
-          _.compact(nextRoute.split('/')),
-          (carry, s) => (carry.routes && carry.routes[s]) || carry,
-          trackConfig
-        )
-        chunks.push(nextState.prompt)
+        const nextRoute = this.getRoute(trackConfig, nextRoutePath)
+        chunks.push(nextRoute.prompt({ profile: userState.profile }))
 
-        userState.route = nextRoute
+        userState.route = nextRoutePath
         save.push(userState)
 
         reply.userStateId = userState._id
@@ -93,17 +129,14 @@ class Engine {
         userState = await UserState.create({
           userId: u._id,
           trackId: t._id,
-          route: '/root'
+          route: '/root',
+          profile: {}
         })
 
-        let currentState = _.reduce(
-          _.compact(userState.route.split('/')),
-          (carry, s) => (carry.routes && carry.routes[s]) || carry,
-          trackConfig
-        )
+        const currentRoute = this.getRoute(trackConfig, userState.route)
 
         reply.userStateId = userState._id
-        reply.text = currentState.prompt
+        reply.text = currentRoute.prompt({ profile: userState.profile })
       }
     } catch (e) {
       reply.text = e.toString()

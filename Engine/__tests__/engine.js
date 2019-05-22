@@ -66,9 +66,6 @@ describe('Track tests', () => {
 
         const reply = await engine.processInboundMessage(m)
 
-        expect(reply.text).toMatch(trackConfig.routes.root.prompt)
-        expect(reply.text).not.toMatch(trackConfig.noop)
-
         user = await User.findOne({ number: 'a' })
         expect(user).toMatchObject({ number: 'a' })
 
@@ -82,7 +79,10 @@ describe('Track tests', () => {
           userId: user._id,
           userStateId: userState._id
         })
-        expect(r.text).toMatch(trackConfig.routes.root.prompt)
+        expect(r).toBeTruthy()
+
+        expect(reply.text).toMatch(r.text)
+        expect(reply.text).not.toMatch(trackConfig.noop)
       })
 
       // test('It should respond with generic help', async () => {
