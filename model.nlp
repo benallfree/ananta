@@ -33,42 +33,34 @@
         "trainByDomain": true,
         "keepStopwords": true,
         "stemDict": {
-          "for,goodby,now": {
+          "her,punch": {
             "domain": "default",
-            "intent": "greetings.bye"
+            "intent": "attack"
           },
-          "bye,bye,care,take": {
+          "attack,her": {
             "domain": "default",
-            "intent": "greetings.bye"
+            "intent": "attack"
           },
-          "later,okay,see,you": {
+          "her,shoot": {
             "domain": "default",
-            "intent": "greetings.bye"
+            "intent": "attack"
           },
-          "bye,for,now": {
+          "around,look": {
             "domain": "default",
-            "intent": "greetings.bye"
+            "intent": "look"
           },
-          "go,i,must": {
+          "look": {
             "domain": "default",
-            "intent": "greetings.bye"
+            "intent": "look"
           },
-          "hello": {
+          "around,search": {
             "domain": "default",
-            "intent": "greetings.hello"
-          },
-          "hi": {
-            "domain": "default",
-            "intent": "greetings.hello"
-          },
-          "howdi": {
-            "domain": "default",
-            "intent": "greetings.hello"
+            "intent": "look"
           }
         },
         "intentDict": {
-          "greetings.bye": "default",
-          "greetings.hello": "default"
+          "attack": "default",
+          "look": "default"
         },
         "useStemDict": true,
         "domains": {
@@ -94,117 +86,76 @@
               {
                 "intent": "default",
                 "utterance": [
-                  "goodby",
-                  "for",
-                  "now"
+                  "punch",
+                  "her"
                 ],
                 "tokens": [
-                  "goodby",
-                  "for",
-                  "now"
+                  "punch",
+                  "her"
                 ]
               },
               {
                 "intent": "default",
                 "utterance": [
-                  "bye",
-                  "bye",
-                  "take",
-                  "care"
+                  "attack",
+                  "her"
                 ],
                 "tokens": [
-                  "bye",
-                  "bye",
-                  "take",
-                  "care"
+                  "attack",
+                  "her"
                 ]
               },
               {
                 "intent": "default",
                 "utterance": [
-                  "okay",
-                  "see",
-                  "you",
-                  "later"
+                  "shoot",
+                  "her"
                 ],
                 "tokens": [
-                  "okay",
-                  "see",
-                  "you",
-                  "later"
+                  "shoot",
+                  "her"
                 ]
               },
               {
                 "intent": "default",
                 "utterance": [
-                  "bye",
-                  "for",
-                  "now"
+                  "look",
+                  "around"
                 ],
                 "tokens": [
-                  "bye",
-                  "for",
-                  "now"
+                  "look",
+                  "around"
                 ]
               },
               {
                 "intent": "default",
                 "utterance": [
-                  "i",
-                  "must",
-                  "go"
+                  "look"
                 ],
                 "tokens": [
-                  "i",
-                  "must",
-                  "go"
+                  "look"
                 ]
               },
               {
                 "intent": "default",
                 "utterance": [
-                  "hello"
+                  "search",
+                  "around"
                 ],
                 "tokens": [
-                  "hello"
-                ]
-              },
-              {
-                "intent": "default",
-                "utterance": [
-                  "hi"
-                ],
-                "tokens": [
-                  "hi"
-                ]
-              },
-              {
-                "intent": "default",
-                "utterance": [
-                  "howdi"
-                ],
-                "tokens": [
-                  "howdi"
+                  "search",
+                  "around"
                 ]
               }
             ],
             "features": {
-              "goodby": 1,
-              "for": 2,
-              "now": 2,
-              "bye": 3,
-              "take": 1,
-              "care": 1,
-              "okay": 1,
-              "see": 1,
-              "you": 1,
-              "later": 1,
-              "i": 1,
-              "must": 1,
-              "go": 1,
-              "hello": 1,
-              "hi": 1,
-              "howdi": 1
+              "punch": 1,
+              "her": 3,
+              "attack": 1,
+              "shoot": 1,
+              "look": 2,
+              "around": 2,
+              "search": 1
             },
             "isEditing": false,
             "className": "BrainNLU",
@@ -260,119 +211,78 @@
             "keepStopwords": true,
             "docs": [
               {
-                "intent": "greetings.bye",
+                "intent": "attack",
                 "utterance": [
-                  "goodby",
-                  "for",
-                  "now"
+                  "punch",
+                  "her"
                 ],
                 "tokens": [
-                  "goodby",
-                  "for",
-                  "now"
+                  "punch",
+                  "her"
                 ]
               },
               {
-                "intent": "greetings.bye",
+                "intent": "attack",
                 "utterance": [
-                  "bye",
-                  "bye",
-                  "take",
-                  "care"
+                  "attack",
+                  "her"
                 ],
                 "tokens": [
-                  "bye",
-                  "bye",
-                  "take",
-                  "care"
+                  "attack",
+                  "her"
                 ]
               },
               {
-                "intent": "greetings.bye",
+                "intent": "attack",
                 "utterance": [
-                  "okay",
-                  "see",
-                  "you",
-                  "later"
+                  "shoot",
+                  "her"
                 ],
                 "tokens": [
-                  "okay",
-                  "see",
-                  "you",
-                  "later"
+                  "shoot",
+                  "her"
                 ]
               },
               {
-                "intent": "greetings.bye",
+                "intent": "look",
                 "utterance": [
-                  "bye",
-                  "for",
-                  "now"
+                  "look",
+                  "around"
                 ],
                 "tokens": [
-                  "bye",
-                  "for",
-                  "now"
+                  "look",
+                  "around"
                 ]
               },
               {
-                "intent": "greetings.bye",
+                "intent": "look",
                 "utterance": [
-                  "i",
-                  "must",
-                  "go"
+                  "look"
                 ],
                 "tokens": [
-                  "i",
-                  "must",
-                  "go"
+                  "look"
                 ]
               },
               {
-                "intent": "greetings.hello",
+                "intent": "look",
                 "utterance": [
-                  "hello"
+                  "search",
+                  "around"
                 ],
                 "tokens": [
-                  "hello"
-                ]
-              },
-              {
-                "intent": "greetings.hello",
-                "utterance": [
-                  "hi"
-                ],
-                "tokens": [
-                  "hi"
-                ]
-              },
-              {
-                "intent": "greetings.hello",
-                "utterance": [
-                  "howdi"
-                ],
-                "tokens": [
-                  "howdi"
+                  "search",
+                  "around"
                 ]
               }
             ],
             "features": {
-              "goodby": 1,
-              "for": 2,
-              "now": 2,
-              "bye": 3,
-              "take": 1,
-              "care": 1,
-              "okay": 1,
-              "see": 1,
-              "you": 1,
-              "later": 1,
-              "i": 1,
-              "must": 1,
-              "go": 1,
-              "hello": 1,
-              "hi": 1,
-              "howdi": 1
+              "punch": 1,
+              "her": 3,
+              "attack": 1,
+              "shoot": 1,
+              "look": 2,
+              "around": 2,
+              "search": 1
             },
             "isEditing": false,
             "className": "BrainNLU",
@@ -396,69 +306,42 @@
               "labels": [],
               "network": {
                 "sizes": [
-                  16,
+                  7,
                   2
                 ],
                 "layers": [
                   {
-                    "goodby": {},
-                    "for": {},
-                    "now": {},
-                    "bye": {},
-                    "take": {},
-                    "care": {},
-                    "okay": {},
-                    "see": {},
-                    "you": {},
-                    "later": {},
-                    "i": {},
-                    "must": {},
-                    "go": {},
-                    "hello": {},
-                    "hi": {},
-                    "howdi": {}
+                    "punch": {},
+                    "her": {},
+                    "attack": {},
+                    "shoot": {},
+                    "look": {},
+                    "around": {},
+                    "search": {}
                   },
                   {
-                    "greetings.bye": {
-                      "bias": 3.337623358,
+                    "attack": {
+                      "bias": 3.022363424,
                       "weights": {
-                        "goodby": 4.194536209,
-                        "for": 4.458393574,
-                        "now": 4.458393574,
-                        "bye": 4.575573921,
-                        "take": 4.31171751,
-                        "care": 4.31171751,
-                        "okay": 3.325200796,
-                        "see": 3.325200796,
-                        "you": 3.325200796,
-                        "later": 3.325200796,
-                        "i": 4.434985638,
-                        "must": 4.434985638,
-                        "go": 4.434985638,
-                        "hello": -3.304569244,
-                        "hi": -3.283596277,
-                        "howdi": -3.260215282
+                        "punch": 3.41106081,
+                        "her": 10.233233452,
+                        "attack": 3.411082029,
+                        "shoot": 3.411071062,
+                        "look": -3.022361279,
+                        "around": -1.925249696,
+                        "search": -1.166125536
                       }
                     },
-                    "greetings.hello": {
-                      "bias": 7.967189789,
+                    "look": {
+                      "bias": 6.840098381,
                       "weights": {
-                        "goodby": -2.237441063,
-                        "for": -2.844242811,
-                        "now": -2.844242811,
-                        "bye": -3.044986486,
-                        "take": -2.438184738,
-                        "care": -2.438184738,
-                        "okay": -1.984106064,
-                        "see": -1.984106064,
-                        "you": -1.984106064,
-                        "later": -1.984106064,
-                        "i": -2.637580156,
-                        "must": -2.637580156,
-                        "go": -2.637580156,
-                        "hello": 8.602454185,
-                        "hi": 8.638814926,
-                        "howdi": 8.588457108
+                        "punch": -1.708330154,
+                        "her": -5.119165421,
+                        "attack": -1.7065413,
+                        "shoot": -1.704296231,
+                        "look": 9.57407093,
+                        "around": 0.504788399,
+                        "search": 9.215891838
                       }
                     }
                   }
@@ -481,35 +364,27 @@
     "extraSentences": [
       [
         "en",
-        "goodbye for now"
+        "punch her"
       ],
       [
         "en",
-        "bye bye take care"
+        "attack her"
       ],
       [
         "en",
-        "okay see you later"
+        "shoot her"
       ],
       [
         "en",
-        "bye for now"
+        "look around"
       ],
       [
         "en",
-        "i must go"
+        "look"
       ],
       [
         "en",
-        "hello"
-      ],
-      [
-        "en",
-        "hi"
-      ],
-      [
-        "en",
-        "howdy"
+        "search around"
       ]
     ]
   },
@@ -535,25 +410,6 @@
     "namedEntities": {}
   },
   "slotManager": {},
-  "responses": {
-    "en": {
-      "greetings.bye": [
-        {
-          "response": "Till next time"
-        },
-        {
-          "response": "see you soon!"
-        }
-      ],
-      "greetings.hello": [
-        {
-          "response": "Hey there!"
-        },
-        {
-          "response": "Greetings!"
-        }
-      ]
-    }
-  },
+  "responses": {},
   "actions": {}
 }

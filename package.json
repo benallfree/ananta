@@ -4,8 +4,8 @@
   "description": "High tech coaching with a human touch.",
   "scripts": {
     "serve:tunnel": "lt --port 3000 --subdomain coachbot",
-    "serve": "cross-env NODE_ENV=development nodemon --watch src --exec babel-node --config-file=./node_modules/next/dist/build/babel/preset.js server.js",
-    "start": "cross-env NODE_ENV=production babel-node  --config-file=./node_modules/next/dist/build/babel/preset.js server.js",
+    "serve": "cross-env NODE_ENV=development nodemon --watch server.js --watch Engine --exec babel-node  server.js",
+    "start": "cross-env NODE_ENV=production babel-node server.js",
     "test": "jest",
     "test:watch": "jest --watchAll"
   },
@@ -20,8 +20,10 @@
     "eslint": "^5.16.0",
     "eslint-plugin-jest": "^22.5.1",
     "eslint-plugin-react": "^7.13.0",
+    "glob-promise": "^3.4.0",
     "jest": "^24.8.0",
     "localtunnel": "^1.9.1",
+    "node-glob": "^1.2.0",
     "nodemon": "^1.19.0",
     "prettier": "^1.17.1"
   },

@@ -5,7 +5,7 @@ import fetch from 'isomorphic-fetch'
 class HomePage extends Component {
   // fetch old messages data from the server
   static async getInitialProps({ req }) {
-    const response = await fetch('https://next-socket-io.now.sh/messages')
+    const response = await fetch('http://localhost:3000/api/v1/messages')
     const messages = await response.json()
     return { messages }
   }
@@ -22,7 +22,7 @@ class HomePage extends Component {
 
   // connect to WS server and listen event
   componentDidMount() {
-    this.socket = io('https://next-socket-io.now.sh/')
+    this.socket = io('http://localhost:3000/')
     this.socket.on('message', this.handleMessage)
   }
 
@@ -34,6 +34,7 @@ class HomePage extends Component {
 
   // add messages from server to the state
   handleMessage = message => {
+    console.log({ message })
     this.setState(state => ({ messages: state.messages.concat(message) }))
   }
 
@@ -45,29 +46,28 @@ class HomePage extends Component {
   handleSubmit = event => {
     event.preventDefault()
 
-    // create message object
-    const message = {
-      id: new Date().getTime(),
-      value: this.state.field
-    }
-
     // send object to WS server
-    this.socket.emit('message', message)
+    this.socket.emit('message', this.state.field)
 
     // add it to state and clean current input value
     this.setState(state => ({
       field: '',
-      messages: state.messages.concat(message)
+      messages: state.messages.concat({
+        _id: new Date().getTime(),
+        text: this.state.field
+      })
     }))
   }
 
   render() {
+    const { messages, field } = this.state
+    console.log({ messages })
     return (
       <main>
         <div>
           <ul>
-            {this.state.messages.map(message => (
-              <li key={message.id}>{message.value}</li>
+            {messages.map(message => (
+              <li key={message._id}>{message.text}</li>
             ))}
           </ul>
           <form onSubmit={this.handleSubmit}>
@@ -75,7 +75,7 @@ class HomePage extends Component {
               onChange={this.handleChange}
               type="text"
               placeholder="Hello world!"
-              value={this.state.field}
+              value={field}
             />
             <button>Send</button>
           </form>

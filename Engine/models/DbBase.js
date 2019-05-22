@@ -24,7 +24,9 @@ class DbBase {
   }
 
   static async findOne(search) {
-    return this.getCollectionRef().findOne(search)
+    const res = await this.getCollectionRef().findOne(search)
+    if (!res) return null
+    return new this(res)
   }
 
   static async findOrCreateOne(search, create = null) {
