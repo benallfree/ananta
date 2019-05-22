@@ -1,29 +1,27 @@
 module.exports = {
-  prompt: '[never shown]',
-  getIntent: () => 'arrive',
-  intents: {
-    arrive: {
-      prompt: 'Welcome to VHAB!',
-      getIntent: async text => {
-        const { NlpManager } = require('node-nlp')
-
-        const manager = new NlpManager({ languages: ['en'] })
-
-        manager.addDocument('en', 'punch her', 'attack')
-        manager.addDocument('en', 'attack her', 'attack')
-        manager.addDocument('en', 'shoot her', 'attack')
-
-        await manager.train()
-        manager.save()
-        const response = await manager.process(text)
-
-        console.log(response)
-        return response.intent
+  slug: 'vhab',
+  name: 'VHAB',
+  number: '+13103638812',
+  noop: 'Do you need help? Please contact VHAB at 800-444-7735.',
+  routes: {
+    root: {
+      prompt:
+        'Welcome to VHAB, my name is Sasha. I am here to help you track your drinking patterns.',
+      run: async ({ text, say, intent }) => {
+        switch (intent) {
+          case 'look':
+            say(
+              'You gaze upon the oracle Anata. She is hovering 6 inches above the ground.'
+            )
+            break
+          case 'attack':
+            say("You can't attack Anata, loser.")
+            break
+        }
       },
       intents: {
-        attack: {
-          prompt: 'Your attack does nothing, loser.'
-        }
+        attack: ['punch her', 'attack her', 'shoot her'],
+        look: ['look around', 'look', 'search around']
       }
     }
   }

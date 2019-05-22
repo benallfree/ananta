@@ -2,6 +2,7 @@ import { Engine } from '../Engine'
 import { Message, User, Track, UserState } from '../models'
 import { resolve } from 'path'
 import glob from 'glob'
+import { fstat, existsSync } from 'fs'
 
 const engine = new Engine()
 
@@ -18,19 +19,22 @@ test('Engine should send a friendly message if an unidentified track is pinged',
 describe('Track tests', () => {
   const rootPath = resolve(__dirname, '../../tracks/')
   const opts = { cwd: rootPath }
-  const modules = glob.sync('**/_test.js', opts)
+  const modules = glob.sync('*', opts)
   modules.forEach(path => {
-    const testPath = resolve(rootPath, path)
-    const trackPath = resolve(rootPath, path, '..')
-    const factory = require(testPath)
+    const trackPath = resolve(rootPath, path)
     const trackConfig = require(trackPath)
-    const name = `${trackConfig.name} (${trackConfig.slug})`
+    const name = `${trackConfig.name || path} (${trackConfig.slug})`
 
     test(`${name} is well formed`, () => {
       expect(trackConfig).toBeTruthy()
       expect(trackConfig.name).toBeTruthy()
       expect(trackConfig.slug).toBeTruthy()
       expect(trackConfig.number).toBeTruthy()
+      expect(trackConfig.noop).toBeTruthy()
+      expect(trackConfig.routes).toBeTruthy()
+      expect(trackConfig.routes.root).toBeTruthy()
+      expect(trackConfig.routes.root.prompt).toBeTruthy()
+      expect(trackConfig.routes.root.run).toBeTruthy()
     })
 
     describe(name, () => {
@@ -62,7 +66,8 @@ describe('Track tests', () => {
 
         const reply = await engine.processInboundMessage(m)
 
-        expect(reply.text).toMatch(/listening/)
+        expect(reply.text).toMatch(trackConfig.routes.root.prompt)
+        expect(reply.text).not.toMatch(trackConfig.noop)
 
         user = await User.findOne({ number: 'a' })
         expect(user).toMatchObject({ number: 'a' })
@@ -77,7 +82,7 @@ describe('Track tests', () => {
           userId: user._id,
           userStateId: userState._id
         })
-        expect(r.text).toMatch(/listening/)
+        expect(r.text).toMatch(trackConfig.routes.root.prompt)
       })
 
       // test('It should respond with generic help', async () => {
@@ -91,26 +96,31 @@ describe('Track tests', () => {
       //   expect(r.text).toMatch(/http/)
       // })
 
-      describe('Track-specific tests', () => {
-        let reply = null
-        async function snd(txt) {
-          const m = new Message({
-            from: 'user',
-            to: track.number,
-            text: txt
+      const testPath = resolve(rootPath, path, '_test.js')
+      if (existsSync(testPath)) {
+        const testFactory = require(testPath)
+
+        describe('Track-specific tests', () => {
+          let reply = null
+          async function snd(txt) {
+            const m = new Message({
+              from: 'user',
+              to: track.number,
+              text: txt
+            })
+            reply = await engine.processInboundMessage(m)
+          }
+
+          async function rcv(regex) {
+            expect(reply.text).toMatch(regex)
+          }
+
+          testFactory({
+            snd,
+            rcv
           })
-          reply = await engine.processInboundMessage(m)
-        }
-
-        async function rcv(regex) {
-          expect(reply.text).toMatch(regex)
-        }
-
-        factory({
-          snd,
-          rcv
         })
-      })
+      }
     })
   })
 })

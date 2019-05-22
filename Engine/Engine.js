@@ -30,11 +30,6 @@ class Engine {
 
       reply.trackId = t._id
 
-      const userState = await UserState.findOrCreateOne(
-        { userId: u._id, trackId: t._id },
-        { userId: u._id, trackId: t._id, route: '/root' }
-      )
-
       const trackPath = `../tracks/${t.slug}`
 
       let trackConfig = null
@@ -45,55 +40,71 @@ class Engine {
         throw 'Oops! This number is not functioning, but should be. Please contact support.'
       }
 
-      let currentState = _.reduce(
-        _.compact(userState.route.split('/')),
-        (carry, s) => {
-          return carry.states[s]
-        },
-        trackConfig
-      )
+      let userState = await UserState.findOne({ userId: u._id, trackId: t._id })
+      if (userState) {
+        let currentState = _.reduce(
+          _.compact(userState.route.split('/')),
+          (carry, s) => (carry.routes && carry.routes[s]) || carry,
+          trackConfig
+        )
 
-      const chunks = []
-      function say(text) {
-        chunks.push(text)
-      }
+        const chunks = []
+        function say(text) {
+          chunks.push(text)
+        }
 
-      let nextRoute = userState.route
-      function goto(newRoute) {
-        nextRoute = path.join(userState.route, newRoute)
-      }
+        let nextRoute = userState.route
+        function goto(newRoute) {
+          nextRoute = path.join(userState.route, newRoute)
+        }
 
-      if (!currentState.nlpManager) {
-        const manager = new NlpManager({ languages: ['en'] })
-        _.each(currentState.intents, (trainingSet, intentName) =>
-          _.each(trainingSet, trainingText =>
-            manager.addDocument('en', trainingText, intentName)
+        if (!currentState.nlpManager) {
+          const manager = new NlpManager({ languages: ['en'] })
+          _.each(currentState.intents, (trainingSet, intentName) =>
+            _.each(trainingSet, trainingText =>
+              manager.addDocument('en', trainingText, intentName)
+            )
           )
+          await manager.train()
+          await manager.save()
+          currentState.nlpManager = manager
+        }
+        const { intent } = await currentState.nlpManager.process(text)
+        await currentState.run({ text, say, goto, intent })
+
+        if (chunks.length === 0)
+          chunks.push(
+            currentState.noop || trackConfig.noop || 'Nothing happened.'
+          )
+
+        const nextState = _.reduce(
+          _.compact(nextRoute.split('/')),
+          (carry, s) => (carry.routes && carry.routes[s]) || carry,
+          trackConfig
         )
-        await manager.train()
-        await manager.save()
-        currentState.nlpManager = manager
+        chunks.push(nextState.prompt)
+
+        userState.route = nextRoute
+        save.push(userState)
+
+        reply.userStateId = userState._id
+        reply.text = chunks.join(' ')
+      } else {
+        userState = await UserState.create({
+          userId: u._id,
+          trackId: t._id,
+          route: '/root'
+        })
+
+        let currentState = _.reduce(
+          _.compact(userState.route.split('/')),
+          (carry, s) => (carry.routes && carry.routes[s]) || carry,
+          trackConfig
+        )
+
+        reply.userStateId = userState._id
+        reply.text = currentState.prompt
       }
-      const { intent } = await currentState.nlpManager.process(text)
-      await currentState.run({ text, say, goto, intent })
-
-      if (chunks.length === 0)
-        chunks.push(
-          currentState.noop || trackConfig.noop || 'Nothing happened.'
-        )
-
-      const nextState = _.reduce(
-        _.compact(nextRoute.split('/')),
-        (carry, s) => carry.states[s],
-        trackConfig
-      )
-      chunks.push(nextState.prompt)
-
-      userState.route = nextRoute
-      save.push(userState)
-
-      reply.userStateId = userState._id
-      reply.text = chunks.join(' ')
     } catch (e) {
       reply.text = e.toString()
     } finally {

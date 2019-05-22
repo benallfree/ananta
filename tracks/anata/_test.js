@@ -8,6 +8,6 @@ module.exports = function({ snd, rcv }) {
     await snd('look around')
     await rcv('hovering')
     await snd('foo')
-    await rcv('nothing')
+    await rcv(/nothing/i)
   })
 }

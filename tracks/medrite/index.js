@@ -1,29 +1,27 @@
 module.exports = {
-  prompt: '[never shown]',
-  getIntent: () => 'arrive',
-  intents: {
-    arrive: {
-      prompt: 'Welcome to Med+Rite!',
-      getIntent: async text => {
-        const { NlpManager } = require('node-nlp')
-
-        const manager = new NlpManager({ languages: ['en'] })
-
-        manager.addDocument('en', 'punch her', 'attack')
-        manager.addDocument('en', 'attack her', 'attack')
-        manager.addDocument('en', 'shoot her', 'attack')
-
-        await manager.train()
-        manager.save()
-        const response = await manager.process(text)
-
-        console.log(response)
-        return response.intent
+  slug: 'medrite',
+  name: 'Med+Rite',
+  number: '+13103638812',
+  noop: 'Do you need help? Please contact Med+Rite at 800-444-7735.',
+  routes: {
+    root: {
+      prompt:
+        'Welcome to Med+Rite, my name is Sasha. I have your eBook on how to avoid Medicare penalties is ready to go, may I have your email address?',
+      run: async ({ text, say, intent }) => {
+        switch (intent) {
+          case 'look':
+            say(
+              'You gaze upon the oracle Anata. She is hovering 6 inches above the ground.'
+            )
+            break
+          case 'attack':
+            say("You can't attack Anata, loser.")
+            break
+        }
       },
       intents: {
-        attack: {
-          prompt: 'Your attack does nothing, loser.'
-        }
+        attack: ['punch her', 'attack her', 'shoot her'],
+        look: ['look around', 'look', 'search around']
       }
     }
   }
