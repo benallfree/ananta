@@ -23,6 +23,11 @@ class DbBase {
     return dataStores[collectionName]
   }
 
+  static async find(search) {
+    const coll = await this.getCollectionRef().find(search)
+    return _.map(coll, item => new this(item))
+  }
+
   static async findOne(search) {
     const res = await this.getCollectionRef().findOne(search)
     if (!res) return null
@@ -60,13 +65,9 @@ class DbBase {
   }
 
   async save() {
-    if (this._id) {
-      return this.constructor
-        .getCollectionRef()
-        .update({ _id: this._id }, { $set: this.getAttrs() })
-    } else {
-      return this.constructor.getCollectionRef().insert(this.getAttrs())
-    }
+    return this.constructor
+      .getCollectionRef()
+      .update({ _id: this._id }, { $set: this.getAttrs() }, { upsert: true })
   }
 
   getAttrs() {
