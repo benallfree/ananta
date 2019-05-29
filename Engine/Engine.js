@@ -1,71 +1,76 @@
 import _ from 'lodash'
 import path from 'path'
-import { User, Track, UserState, Message } from './models'
+import { Message } from './models'
 const { NlpManager } = require('node-nlp')
 
 class Engine {
-  getRoute(trackConfig, routePath) {
-    console.log({ trackConfig, routePath })
-    const route = _.reduce(
-      _.compact(routePath.split('/')),
-      (carry, s) => (carry.routes && carry.routes[s]) || carry,
-      trackConfig
-    )
+  getUniverse(universePath) {
+    const universe = require(universePath)
+    if (universe.isInitialized) return universe
 
-    if (!(route.run instanceof Function)) {
-      route.run = () => {}
-    }
-
-    if (!(route.prompt instanceof Function)) {
-      const oldPrompt = route.prompt
-      route.prompt = () => oldPrompt
-    }
-
-    return route
-  }
-
-  async processInboundMessage(inboundMessage) {
-    const { to, from, text } = inboundMessage
-
-    const t = await Track.findOne({ number: to })
-    if (t) {
-      inboundMessage.trackId = t._id
-    }
-
-    const u = await User.findOrCreateOne({ number: from })
-    inboundMessage.userId = u._id
-
-    const reply = await Message.create({
-      from: to,
-      to: from,
-      userId: u._id
-    })
-
-    const save = [inboundMessage, reply]
-
-    try {
-      if (!inboundMessage.trackId) {
-        throw 'Oops! This number is not active. Please check and try again.'
+    const initRoute = route => {
+      if (!(route.run instanceof Function)) {
+        route.run = () => {}
       }
 
-      reply.trackId = t._id
+      if (!(route.prompt instanceof Function)) {
+        const oldPrompt = route.prompt
+        route.prompt = () => oldPrompt
+      }
 
-      const trackPath = `../tracks/${t.slug}`
+      _.each(route.routes, r => initRoute(r))
+    }
+    _.each(universe.routes, r => initRoute(r))
+    universe.route = path =>
+      _.reduce(
+        _.compact(path.split('/')),
+        (carry, s) => (carry.routes && carry.routes[s]) || carry,
+        universe
+      )
+    universe.isInitialized = true
+    return universe
+  }
 
-      let trackConfig = null
+  async processInboundMessage({ userState, text }) {
+    const inboundMessage = new Message({
+      userId: userState.userId,
+      userStateId: userState._id,
+      universeSlug: userState.universeSlug,
+      direction: 'receive',
+      text
+    })
+
+    const reply = await Message.create({
+      userId: userState.userId,
+      userStateId: userState._id,
+      universeSlug: userState.universeSlug,
+      direction: 'send',
+      text
+    })
+
+    const save = { inboundMessage, reply }
+
+    if (!userState.profile) {
+      userState.profile = {}
+      save.userState = userState
+    }
+
+    try {
+      const universePath = `../universes/${userState.universeSlug}`
+
+      let universe = null
       try {
-        trackConfig = require(trackPath)
+        universe = this.getUniverse(universePath)
       } catch (e) {
         console.log(e.toString())
       }
-      if (!trackConfig) {
+      if (!universe) {
         throw 'Oops! This number is not functioning, but should be. Please contact support.'
       }
 
-      let userState = await UserState.findOne({ userId: u._id, trackId: t._id })
-      if (userState) {
-        save.push(userState)
-        const currentRoute = this.getRoute(trackConfig, userState.route)
+      if (userState.route) {
+        save.userState = userState
+        const currentRoute = universe.route(userState.route)
 
         const chunks = []
         function say(text) {
@@ -113,29 +118,21 @@ class Engine {
         })
 
         if (chunks.length === 0)
-          chunks.push(
-            currentRoute.noop || trackConfig.noop || 'Nothing happened.'
-          )
+          chunks.push(currentRoute.noop || universe.noop || 'Nothing happened.')
 
-        const nextRoute = this.getRoute(trackConfig, nextRoutePath)
+        const nextRoute = universe.route(nextRoutePath)
         chunks.push(nextRoute.prompt({ profile: userState.profile }))
 
         userState.route = nextRoutePath
-        save.push(userState)
+        save.userState = userState
 
         reply.userStateId = userState._id
         reply.text = chunks.join(' ')
       } else {
-        userState = await UserState.create({
-          userId: u._id,
-          trackId: t._id,
-          route: '/root',
-          profile: {}
-        })
+        userState.route = '/root'
 
-        const currentRoute = this.getRoute(trackConfig, userState.route)
+        const currentRoute = universe.route(userState.route)
 
-        reply.userStateId = userState._id
         reply.text = currentRoute.prompt({ profile: userState.profile })
       }
     } catch (e) {

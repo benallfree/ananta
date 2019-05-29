@@ -1,4 +1,5 @@
 export * from './User'
 export * from './Message'
-export * from './Track'
+export * from './Endpoint'
 export * from './UserState'
+export * from './PhoneNumber'

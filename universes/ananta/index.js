@@ -1,21 +1,20 @@
 module.exports = {
-  slug: 'vhab',
-  name: 'VHAB',
-  number: '+13103638812',
-  noop: 'Do you need help? Please contact VHAB at 800-444-7735.',
+  slug: 'ananta',
+  name: 'Ananta',
+  number: '+19384448608',
+  noop: 'Nothing happens.',
   routes: {
     root: {
-      prompt:
-        'Welcome to VHAB, my name is Sasha. I am here to help you track your drinking patterns.',
+      prompt: 'Ananta is listening.',
       run: async ({ text, say, intent }) => {
         switch (intent) {
           case 'look':
             say(
-              'You gaze upon the oracle Anata. She is hovering 6 inches above the ground.'
+              'You gaze upon the oracle Ananta. She is hovering 6 inches above the ground.'
             )
             break
           case 'attack':
-            say("You can't attack Anata, loser.")
+            say("You can't attack Ananta, loser.")
             break
         }
       },
