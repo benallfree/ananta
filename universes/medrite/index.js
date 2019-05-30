@@ -1,4 +1,4 @@
-const _ = require('lodash')
+const path = require('path')
 
 module.exports = {
   slug: 'medrite',
@@ -14,7 +14,12 @@ module.exports = {
         const { email } = entities
         if (email) {
           profile.email = email
-          sendEmail(email, `Med+Rite eBook`, `Here is your free eBook`)
+          sendEmail(
+            email,
+            `Med+Rite eBook`,
+            `Here is your free eBook`,
+            path.resolve(__dirname, 'ebook.pdf')
+          )
           goto('sent')
         }
       },

@@ -1,7 +1,10 @@
+const nodemailer = require('nodemailer')
 import _ from 'lodash'
 import path from 'path'
 import { Message } from './models'
 const { NlpManager } = require('node-nlp')
+require('dotenv').config()
+var mime = require('mime-types')
 
 class Engine {
   getUniverse(universePath) {
@@ -27,6 +30,27 @@ class Engine {
         (carry, s) => (carry.routes && carry.routes[s]) || carry,
         universe
       )
+    if (!universe.smtp) {
+      universe.smtp = {
+        fromName: universe.name,
+        fromEmail: 'noreply@ananta.io',
+        transport: {
+          host: process.env.MAIL_HOST,
+          port: process.env.MAIL_PORT,
+          auth: {
+            user: process.env.MAIL_USER,
+            pass: process.env.MAIL_PASSWORD
+          }
+        }
+      }
+    }
+    if (process.env.NODE_ENV === 'test') {
+      universe.smtp.transport = {
+        host: 'localhost',
+        port: 1025,
+        ignoreTLS: true
+      }
+    }
     universe.isInitialized = true
     return universe
   }
@@ -73,17 +97,36 @@ class Engine {
         const currentRoute = universe.route(userState.route)
 
         const chunks = []
-        function say(text) {
+        const say = text => {
           chunks.push(text)
         }
 
         let nextRoutePath = userState.route
-        function goto(newRoute) {
+        const goto = newRoute => {
           nextRoutePath = path.join(userState.route, newRoute)
         }
 
-        function sendEmail(to, subject, body) {
-          console.log('email noop')
+        const sendEmail = async (to, subject, body, attachment = '') => {
+          const transporter = nodemailer.createTransport(
+            universe.smtp.transport
+          )
+          const params = {
+            from: `"${universe.smtp.fromName}" <${universe.smtp.fromEmail}>`,
+            to,
+            subject,
+            text: body
+          }
+
+          if (attachment) {
+            params.attachments = [
+              {
+                filename: path.basename(attachment),
+                path: attachment,
+                contentType: mime.lookup(attachment)
+              }
+            ]
+          }
+          transporter.sendMail(params)
         }
 
         if (!currentRoute.nlpManager) {
