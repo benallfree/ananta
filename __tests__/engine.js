@@ -28,6 +28,7 @@ describe('Endpoint tests', () => {
     describe(name, () => {
       let user = null
       let userState = null
+      let endpoint = null
       beforeEach(async () => {
         await Promise.all([
           User.delete(),
@@ -35,9 +36,11 @@ describe('Endpoint tests', () => {
           Endpoint.delete(),
           UserState.delete()
         ])
+
+        endpoint = await Endpoint.create({ slug: path })
         user = await User.create({})
         userState = await UserState.create({
-          universeSlug: path,
+          endpointId: endpoint._id,
           userId: user._id
         })
       })
@@ -71,10 +74,14 @@ describe('Endpoint tests', () => {
           async function rcv(regex) {
             expect(reply.text).toMatch(regex)
           }
+          async function nrcv(regex) {
+            expect(reply.text).not.toMatch(regex)
+          }
 
           testFactory({
             snd,
-            rcv
+            rcv,
+            nrcv
           })
         })
       }

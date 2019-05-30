@@ -1,6 +1,6 @@
 const { expectMail } = require('../../jest.mailer')
 
-module.exports = function({ snd, rcv }) {
+module.exports = function({ snd, rcv, nrcv }) {
   test('Responds with greeting', async done => {
     await snd('hi')
     await rcv(/email/i)
@@ -10,6 +10,7 @@ module.exports = function({ snd, rcv }) {
       expect(email.text).toMatch(/free ebook/i)
       expect(email.attachments.length).toBe(1)
       await rcv(/ben@benallfree.com/i)
+      await nrcv(/please provide/i)
       done()
     })
     await snd('ben@benallfree.com')

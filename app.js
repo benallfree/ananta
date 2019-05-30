@@ -89,7 +89,6 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
     })
   } else {
     const phone = await PhoneNumber.findOrCreateOne({
-      universeSlug: endpoint.universeSlug,
       number: From
     })
     if (!phone.userId) {
@@ -98,7 +97,7 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
       phone.save()
     }
     const userState = await UserState.findOrCreateOne({
-      universeSlug: endpoint.universeSlug,
+      endpointId: endpoint._id,
       userId: phone.userId
     })
 
@@ -106,11 +105,10 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
   }
 
   if (process.env.NODE_ENV !== 'test') {
-    const { to, from, text } = ret
     client.messages.create({
-      body: text,
-      to,
-      from
+      body: ret.text,
+      to: From,
+      from: To
     })
   }
 

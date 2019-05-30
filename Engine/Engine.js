@@ -1,7 +1,7 @@
 const nodemailer = require('nodemailer')
 import _ from 'lodash'
 import path from 'path'
-import { Message } from './models'
+import { Message, Endpoint, ErrorLog } from './models'
 const { NlpManager } = require('node-nlp')
 require('dotenv').config()
 var mime = require('mime-types')
@@ -40,7 +40,8 @@ class Engine {
           auth: {
             user: process.env.MAIL_USER,
             pass: process.env.MAIL_PASSWORD
-          }
+          },
+          ignoreTLS: true
         }
       }
     }
@@ -57,17 +58,17 @@ class Engine {
 
   async processInboundMessage({ userState, text }) {
     const inboundMessage = new Message({
-      userId: userState.userId,
+      endpointId: userState.endpointId,
       userStateId: userState._id,
-      universeSlug: userState.universeSlug,
+      userId: userState.userId,
       direction: 'receive',
       text
     })
 
     const reply = await Message.create({
-      userId: userState.userId,
+      endpointId: userState.endpointId,
       userStateId: userState._id,
-      universeSlug: userState.universeSlug,
+      userId: userState.userId,
       direction: 'send',
       text
     })
@@ -80,13 +81,14 @@ class Engine {
     }
 
     try {
-      const universePath = `../universes/${userState.universeSlug}`
+      const endpoint = await Endpoint.findOne({ _id: userState.endpointId })
+      const universePath = `../universes/${endpoint.slug}`
 
       let universe = null
       try {
         universe = this.getUniverse(universePath)
       } catch (e) {
-        console.log(e.toString())
+        console.trace(e.toString())
       }
       if (!universe) {
         throw 'Oops! This number is not functioning, but should be. Please contact support.'
@@ -103,6 +105,7 @@ class Engine {
 
         let nextRoutePath = userState.route
         const goto = newRoute => {
+          chunks.push('')
           nextRoutePath = path.join(userState.route, newRoute)
         }
 
@@ -126,7 +129,15 @@ class Engine {
               }
             ]
           }
-          transporter.sendMail(params)
+          try {
+            await transporter.sendMail(params)
+          } catch (e) {
+            console.trace(e.toString())
+            await ErrorLog.create({
+              message: e.toString(),
+              stack: e.stack
+            })
+          }
         }
 
         if (!currentRoute.nlpManager) {
@@ -150,15 +161,26 @@ class Engine {
           }
         })
 
-        await currentRoute.run({
-          text,
-          say,
-          goto,
-          entities,
-          intent: ai.intent,
-          sendEmail,
-          profile: userState.profile
-        })
+        try {
+          await currentRoute.run({
+            text,
+            say,
+            goto,
+            entities,
+            intent: ai.intent,
+            sendEmail,
+            profile: userState.profile
+          })
+        } catch (e) {
+          const errLog = await ErrorLog.create({
+            message: e.toString(),
+            stack: e.stack
+          })
+          console.trace(e.toString())
+          throw `Oops! An internal error occurred. Please contact support. (ID ${
+            errLog._id
+          })`
+        }
 
         if (chunks.length === 0)
           chunks.push(currentRoute.noop || universe.noop || 'Nothing happened.')

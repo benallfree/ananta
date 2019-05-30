@@ -5,7 +5,7 @@ import { Endpoint, User, Message } from '../Engine/models'
 describe('Twilio endpoint tests', () => {
   beforeEach(async () => {
     await Promise.all([User.delete(), Message.delete(), Endpoint.delete()])
-    await Endpoint.create({ number: 'a', universeSlug: 'ananta' })
+    await Endpoint.create({ number: 'a', slug: 'ananta' })
   })
 
   test("Twilio endpoint should say if a Universe doesn't exist", async () => {
