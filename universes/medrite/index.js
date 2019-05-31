@@ -1,9 +1,7 @@
 const path = require('path')
 
 module.exports = {
-  slug: 'medrite',
   name: 'Med+Rite',
-  number: '+13103638812',
   noop: 'Do you need help? Please contact Med+Rite at 800-444-7735.',
   routes: {
     root: {

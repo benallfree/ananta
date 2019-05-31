@@ -1,84 +1,69 @@
 import { Component } from 'react'
-import io from 'socket.io-client'
-import fetch from 'isomorphic-fetch'
+import _ from 'lodash'
+import Router from 'next/router'
+
+const api = require('../api')
 
 class HomePage extends Component {
-  // fetch old messages data from the server
   static async getInitialProps({ req }) {
-    const response = await fetch('http://localhost:3000/api/v1/messages')
-    const messages = await response.json()
-    return { messages }
+    const universes = await api.universes.list()
+    return { universes }
   }
 
   static defaultProps = {
-    messages: []
+    universes: []
   }
 
-  // init state with the prefetched messages
   state = {
-    field: '',
-    messages: this.props.messages
+    slug: '',
+    phone: ''
   }
 
-  // connect to WS server and listen event
-  componentDidMount() {
-    this.socket = io('http://localhost:3000/')
-    this.socket.on('message', this.handleMessage)
+  handleSlugChange = e => {
+    this.setState({ slug: e.target.value })
   }
 
-  // close socket connection
-  componentWillUnmount() {
-    this.socket.off('message', this.handleMessage)
-    this.socket.close()
+  handlePhoneChange = e => {
+    this.setState({ phone: e.target.value })
   }
 
-  // add messages from server to the state
-  handleMessage = message => {
-    console.log({ message })
-    this.setState(state => ({ messages: state.messages.concat(message) }))
-  }
-
-  handleChange = event => {
-    this.setState({ field: event.target.value })
-  }
-
-  // send messages to server and add them to the state
-  handleSubmit = event => {
-    event.preventDefault()
-
-    // send object to WS server
-    this.socket.emit('message', this.state.field)
-
-    // add it to state and clean current input value
-    this.setState(state => ({
-      field: '',
-      messages: state.messages.concat({
-        _id: new Date().getTime(),
-        text: this.state.field
-      })
-    }))
+  handleGo = e => {
+    const url = `/${this.state.slug}?p=${this.state.phone}`
+    console.log({ url })
+    Router.push(url)
   }
 
   render() {
-    const { messages, field } = this.state
-    console.log({ messages })
+    const { universes } = this.props
+    console.log(this.state)
     return (
       <main>
+        <h1>Available Universes</h1>
         <div>
-          <ul>
-            {messages.map(message => (
-              <li key={message._id}>{message.text}</li>
+          <select name="slug" onChange={this.handleSlugChange}>
+            <option>--Choose--</option>
+            {_.map(universes, universe => (
+              <option key={universe.slug} value={universe.slug}>
+                {universe.name}
+              </option>
             ))}
-          </ul>
-          <form onSubmit={this.handleSubmit}>
-            <input
-              onChange={this.handleChange}
-              type="text"
-              placeholder="Hello world!"
-              value={field}
-            />
-            <button>Send</button>
-          </form>
+          </select>
+        </div>
+        <div>
+          Phone:{' '}
+          <input
+            type="text"
+            value={this.state.phone}
+            onChange={this.handlePhoneChange}
+          />
+        </div>
+        <div>
+          <button
+            onClick={this.handleGo}
+            disabled={!this.state.phone || !this.state.slug}
+          >
+            Go
+          </button>
         </div>
       </main>
     )

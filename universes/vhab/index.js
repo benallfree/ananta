@@ -1,7 +1,5 @@
 module.exports = {
-  slug: 'vhab',
   name: 'VHAB',
-  number: '+13103638812',
   noop: 'Do you need help? Please contact VHAB at 800-444-7735.',
   routes: {
     root: {

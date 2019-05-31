@@ -1,12 +1,12 @@
 module.exports = {
   slug: 'ananta',
   name: 'Ananta',
-  number: '+19384448608',
   noop: 'Nothing happens.',
   routes: {
     root: {
       prompt: 'Ananta is listening.',
       run: async ({ text, say, intent }) => {
+        console.log('intent is', { intent })
         switch (intent) {
           case 'look':
             say(

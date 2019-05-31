@@ -23,6 +23,10 @@ class DbBase {
     return dataStores[collectionName]
   }
 
+  static all() {
+    return this.find()
+  }
+
   static async find(search) {
     const coll = await this.getCollectionRef().find(search)
     return _.map(coll, item => new this(item))

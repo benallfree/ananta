@@ -195,6 +195,7 @@ class Engine {
         reply.text = chunks.join(' ')
       } else {
         userState.route = '/root'
+        save.userState = userState
 
         const currentRoute = universe.route(userState.route)
 

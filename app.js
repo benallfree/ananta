@@ -55,25 +55,49 @@ app.use(bodyParser.urlencoded({ extended: false }))
 //   })
 // )
 socketServer.on('connection', socket => {
-  socket.on('message', async message => {
-    const track = await Endpoint.findOne({ slug: 'medrite' })
-    const user = await User.findOrCreateOne({
-      number: '+18054032380',
-      language: 'en'
-    })
-    const inbound = new Message({
-      from: user.number,
-      to: track.number,
-      text: message
-    })
-    const reply = await engine.processInboundMessage(inbound)
+  socket.on('message', async ({ slug, p, text }) => {
+    const endpoint = await Endpoint.findOne({ slug })
 
+    console.log({ slug, p, text })
+    let reply = null
+    if (!endpoint) {
+      reply = new Message({
+        type: 'webchat',
+        to: p,
+        from: slug,
+        text: 'Oops! This number is not active. Please check and try again.'
+      })
+    } else {
+      const phone = await PhoneNumber.findOrCreateOne({
+        number: p
+      })
+      if (!phone.userId) {
+        const user = await User.create({})
+        phone.userId = user._id
+        phone.save()
+      }
+      const userState = await UserState.findOrCreateOne({
+        endpointId: endpoint._id,
+        userId: phone.userId
+      })
+      console.log({ userState })
+
+      reply = await engine.processInboundMessage({ userState, text })
+    }
+
+    console.log({ reply })
     socket.emit('message', reply)
   })
 })
 
 app.get('/api/v1/messages', (req, res) => {
   res.json([])
+})
+
+app.get('/api/v1/universes', async (req, res) => {
+  const universes = await Endpoint.all()
+
+  res.json(universes)
 })
 
 app.post('/v1/twilio/sms/inbound', async (req, res) => {
@@ -83,6 +107,7 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
   const endpoint = await Endpoint.findOne({ number: To })
   if (!endpoint) {
     ret = new Message({
+      type: 'webchat',
       to: From,
       from: To,
       text: 'Oops! This number is not active. Please check and try again.'
@@ -120,6 +145,11 @@ app.post('/v1/twilio/sms/inbound', async (req, res) => {
 app.get('/ping', (req, res) => {
   res.write('pong')
   res.end()
+})
+
+app.get('/:slug', (req, res) => {
+  console.log({ ...req.query, ...req.params })
+  return nextApp.render(req, res, '/universe', { ...req.query, ...req.params })
 })
 
 app.get('*', (req, res) => {
