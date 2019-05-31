@@ -4,7 +4,8 @@ module.exports = {
     node: true,
     'jest/globals': true
   },
-  plugins: ['jest'],
+  parser: 'babel-eslint',
+  plugins: ['jest', 'babel'],
   extends: ['eslint:recommended', 'plugin:react/recommended'],
   globals: {
     Atomics: 'readonly',
@@ -16,6 +17,9 @@ module.exports = {
   },
   rules: {
     'no-console': 0,
-    'react/react-in-jsx-scope': 0
+    'react/react-in-jsx-scope': 0,
+    'babel/semi': 1,
+    'no-unused-vars': 1,
+    'react/prop-types': 1
   }
 }
