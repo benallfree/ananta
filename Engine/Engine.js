@@ -147,8 +147,8 @@ class Engine {
               manager.addDocument('en', trainingText, intentName)
             )
           )
+          manager.addDocument('en', 'prompt', 'prompt')
           await manager.train()
-          await manager.save()
           currentRoute.nlpManager = manager
         }
         const ai = await currentRoute.nlpManager.process(text)
@@ -181,12 +181,20 @@ class Engine {
             errLog._id
           })`
         }
-
-        if (chunks.length === 0)
-          chunks.push(currentRoute.noop || universe.noop || 'Nothing happened.')
+        console.log(ai.intent)
+        if (chunks.length === 0) {
+          switch (ai.intent) {
+            case 'prompt':
+              break
+            default:
+              chunks.push(
+                currentRoute.noop || universe.noop || 'Nothing happened.'
+              )
+          }
+        }
 
         const nextRoute = universe.route(nextRoutePath)
-        chunks.push(nextRoute.prompt({ profile: userState.profile }))
+        say(nextRoute.prompt({ profile: userState.profile }))
 
         userState.route = nextRoutePath
         save.userState = userState

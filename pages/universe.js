@@ -12,6 +12,12 @@ class Universe extends Component {
   componentDidMount() {
     this.socket = io('http://localhost:3000/')
     this.socket.on('message', this.handleMessage)
+    const { slug, p } = this.props.query
+    this.socket.emit('message', {
+      slug,
+      p,
+      text: 'prompt'
+    })
   }
 
   // close socket connection

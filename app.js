@@ -58,7 +58,6 @@ socketServer.on('connection', socket => {
   socket.on('message', async ({ slug, p, text }) => {
     const endpoint = await Endpoint.findOne({ slug })
 
-    console.log({ slug, p, text })
     let reply = null
     if (!endpoint) {
       reply = new Message({
@@ -80,12 +79,10 @@ socketServer.on('connection', socket => {
         endpointId: endpoint._id,
         userId: phone.userId
       })
-      console.log({ userState })
 
       reply = await engine.processInboundMessage({ userState, text })
     }
 
-    console.log({ reply })
     socket.emit('message', reply)
   })
 })
@@ -148,7 +145,6 @@ app.get('/ping', (req, res) => {
 })
 
 app.get('/:slug', (req, res) => {
-  console.log({ ...req.query, ...req.params })
   return nextApp.render(req, res, '/universe', { ...req.query, ...req.params })
 })
 
