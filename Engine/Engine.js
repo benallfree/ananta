@@ -6,22 +6,34 @@ const { NlpManager } = require('node-nlp')
 require('dotenv').config()
 var mime = require('mime-types')
 
+function functionalize(e) {
+  if (e instanceof Function) return e
+  return () => e
+}
+
 class Engine {
   getUniverse(universePath) {
     const universe = require(universePath)
     if (universe.isInitialized) return universe
+    if (!universe.noop) {
+      universe.noop = () => 'Nothing happened.'
+    }
+    universe.noop = functionalize(universe.noop)
 
-    const initRoute = route => {
+    const initRoute = (route, parentRoute) => {
       if (!(route.run instanceof Function)) {
         route.run = () => {}
       }
 
-      if (!(route.prompt instanceof Function)) {
-        const oldPrompt = route.prompt
-        route.prompt = () => oldPrompt
-      }
+      route.prompt = functionalize(route.prompt)
 
-      _.each(route.routes, r => initRoute(r))
+      route.parent = parentRoute
+      if (!route.noop) {
+        route.noop = parentRoute ? parentRoute.noop : universe.noop
+      }
+      route.noop = functionalize(route.noop)
+
+      _.each(route.routes, r => initRoute(r, parentRoute))
     }
     _.each(universe.routes, r => initRoute(r))
     universe.route = path =>
@@ -106,7 +118,8 @@ class Engine {
         let nextRoutePath = userState.route
         const goto = newRoute => {
           chunks.push('')
-          nextRoutePath = path.join(userState.route, newRoute)
+          nextRoutePath = path.resolve(userState.route, newRoute)
+          console.log({ nextRoutePath, newRoute })
         }
 
         const sendEmail = async (to, subject, body, attachment = '') => {
@@ -161,40 +174,40 @@ class Engine {
           }
         })
 
-        try {
-          await currentRoute.run({
-            text,
-            say,
-            goto,
-            entities,
-            intent: ai.intent,
-            sendEmail,
-            profile: userState.profile
-          })
-        } catch (e) {
-          const errLog = await ErrorLog.create({
-            message: e.toString(),
-            stack: e.stack
-          })
-          console.trace(e.toString())
-          throw `Oops! An internal error occurred. Please contact support. (ID ${
-            errLog._id
-          })`
+        const userParams = {
+          text,
+          say,
+          goto,
+          entities,
+          intent: ai.intent,
+          sendEmail,
+          profile: userState.profile,
+          now: new Date()
         }
-        console.log(ai.intent)
-        if (chunks.length === 0) {
-          switch (ai.intent) {
-            case 'prompt':
-              break
-            default:
-              chunks.push(
-                currentRoute.noop || universe.noop || 'Nothing happened.'
-              )
-          }
+
+        switch (ai.intent) {
+          case 'prompt':
+            break
+          default:
+            try {
+              await currentRoute.run(userParams)
+            } catch (e) {
+              const errLog = await ErrorLog.create({
+                message: e.toString(),
+                stack: e.stack
+              })
+              console.trace(e.toString())
+              throw `Oops! An internal error occurred. Please contact support. (ID ${
+                errLog._id
+              })`
+            }
+            if (chunks.length === 0) {
+              chunks.push(currentRoute.noop(userParams))
+            }
         }
 
         const nextRoute = universe.route(nextRoutePath)
-        say(nextRoute.prompt({ profile: userState.profile }))
+        say(nextRoute.prompt(userParams))
 
         userState.route = nextRoutePath
         save.userState = userState

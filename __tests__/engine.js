@@ -18,7 +18,7 @@ describe('Endpoint tests', () => {
     test(`${name} is well formed`, () => {
       expect(universeConfig).toBeTruthy()
       expect(universeConfig.name).toBeTruthy()
-      expect(universeConfig.noop).toBeTruthy()
+      expect(universeConfig.noop()).toBeTruthy()
       expect(universeConfig.routes).toBeTruthy()
       expect(universeConfig.routes.root).toBeTruthy()
       expect(universeConfig.routes.root.prompt).toBeTruthy()
@@ -45,19 +45,27 @@ describe('Endpoint tests', () => {
         })
       })
 
-      test('It should welcome a new user', async () => {
-        const reply = await engine.processInboundMessage({
-          userState,
-          text: 'Hello'
-        })
+      let reply = null
 
-        const r = await Message.findOne({
-          userId: user._id
-        })
-        expect(r).toBeTruthy()
+      async function snd(txt) {
+        reply = await engine.processInboundMessage({ userState, text: txt })
+      }
 
-        expect(reply.text).toMatch(universeConfig.routes.root.prompt())
-        expect(reply.text).not.toMatch(universeConfig.noop)
+      async function rcv(regex) {
+        expect(reply.text).toMatch(regex)
+      }
+      async function nrcv(regex) {
+        expect(reply.text).not.toMatch(regex)
+      }
+
+      test('It should welcome a new user and prompt an existing user', async () => {
+        await snd('Hello')
+        rcv(universeConfig.routes.root.prompt())
+        nrcv(universeConfig.noop())
+        await snd('Hello')
+        rcv(universeConfig.route(userState.route).noop())
+        await snd('prompt')
+        nrcv(universeConfig.route(userState.route).noop())
       })
 
       const testPath = resolve(rootPath, path, '_test.js')
@@ -65,19 +73,6 @@ describe('Endpoint tests', () => {
         const testFactory = require(testPath)
 
         describe('Endpoint-specific tests', () => {
-          let reply = null
-
-          async function snd(txt) {
-            reply = await engine.processInboundMessage({ userState, text: txt })
-          }
-
-          async function rcv(regex) {
-            expect(reply.text).toMatch(regex)
-          }
-          async function nrcv(regex) {
-            expect(reply.text).not.toMatch(regex)
-          }
-
           testFactory({
             snd,
             rcv,
