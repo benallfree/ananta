@@ -28,7 +28,7 @@ class HomePage extends Component {
   }
 
   handleGo = e => {
-    const url = `/${this.state.slug}?p=${this.state.phone}`
+    const url = `/${this.state.slug}?p=${encodeURIComponent(this.state.phone)}`
     console.log({ url })
     Router.push(url)
   }
