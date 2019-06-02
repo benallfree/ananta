@@ -10,7 +10,7 @@ class Universe extends Component {
 
   // connect to WS server and listen event
   componentDidMount() {
-    this.socket = io('http://localhost:3000/')
+    this.socket = io(process.env.API_HOST)
     this.socket.on('message', this.handleMessage)
     const { slug, p } = this.props.query
     this.socket.emit('message', {

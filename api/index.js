@@ -1,7 +1,7 @@
 const axios = require('axios')
 
 const api = {
-  baseUrl: 'http://localhost:3000/api/v1',
+  baseUrl: `${process.env.API_HOST}/api/v1`,
   universes: {
     list: async () => {
       const data = await api.get('/universes')
