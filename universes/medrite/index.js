@@ -1,6 +1,6 @@
 const path = require('path')
 
-module.exports = {
+module.exports = ({ endpoint }) => ({
   name: 'Med+Rite',
   noop: 'Do you need help? Please contact Med+Rite at 800-444-7735.',
   routes: {
@@ -26,9 +26,12 @@ module.exports = {
           prompt: ({ profile }) =>
             `Great, I've sent the eBook to ${
               profile.email
-            }. You can also view it at https://medrite.com/ebook. I would like to point you to a couple videos as well, can I get your date of birth so I can choose the right ones?`
+            }. You can also view it at https://medrite.com/ebook. I would like to point you to a couple videos as well, can I get your date of birth so I can choose the right ones?`,
+          run: ({ goto }) => {
+            goto('/root')
+          }
         }
       }
     }
   }
-}
+})

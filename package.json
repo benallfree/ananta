@@ -4,10 +4,10 @@
   "description": "High tech coaching with a human touch.",
   "scripts": {
     "serve:tunnel": "lt --port 3000 --subdomain ananta",
-    "serve": "cross-env NODE_ENV=development nodemon --watch server.js --watch app.js --watch Engine --exec babel-node  server.js",
-    "serve:prod": "cross-env NODE_ENV=development babel-node  server.js",
+    "serve": "cross-env NODE_ENV=development nodemon --watch server/index.js --watch server/app.js --exec babel-node  server/index.js",
+    "serve:prod": "cross-env NODE_ENV=development babel-node  server/index.js",
     "serve:mail": "maildev --incoming-user=test --incoming-pass=test",
-    "start": "cross-env NODE_ENV=production babel-node server.js",
+    "start": "cross-env NODE_ENV=production babel-node server/index.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "build": "next build"

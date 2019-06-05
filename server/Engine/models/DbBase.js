@@ -56,10 +56,23 @@ class DbBase {
       {
         createdAt: new Date().getTime(),
         updatedAt: new Date().getTime(),
-        version: 1
+        version: this.constructor.getMigrations().length
       },
       attrs
     )
+    this.migrate()
+  }
+
+  static getMigrations() {
+    return []
+  }
+
+  migrate() {
+    const migrations = this.constructor.getMigrations()
+    _.each(migrations, (m, i) => {
+      m(this)
+      this.version = i
+    })
   }
 
   static async create(attrs) {

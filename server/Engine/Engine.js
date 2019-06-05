@@ -11,11 +11,11 @@ function functionalize(e) {
   return () => e
 }
 
-class Engine {
-  getUniverse(universePath) {
-    delete require.cache[universePath]
+console.log('Loading Engine module')
 
-    const universe = require(universePath)
+class Engine {
+  getUniverse(universePath, args) {
+    const universe = require(universePath)(args)
     if (universe.isInitialized) return universe
     if (!universe.noop) {
       universe.noop = () => 'Nothing happened.'
@@ -44,28 +44,7 @@ class Engine {
         (carry, s) => (carry.routes && carry.routes[s]) || carry,
         universe
       )
-    if (!universe.smtp) {
-      universe.smtp = {
-        fromName: universe.name,
-        fromEmail: 'noreply@ananta.io',
-        transport: {
-          host: process.env.MAIL_HOST,
-          port: process.env.MAIL_PORT,
-          auth: {
-            user: process.env.MAIL_USER,
-            pass: process.env.MAIL_PASSWORD
-          },
-          ignoreTLS: true
-        }
-      }
-    }
-    if (process.env.NODE_ENV === 'test') {
-      universe.smtp.transport = {
-        host: 'localhost',
-        port: 1025,
-        ignoreTLS: true
-      }
-    }
+
     universe.isInitialized = true
     return universe
   }
@@ -96,11 +75,13 @@ class Engine {
 
     try {
       const endpoint = await Endpoint.findOne({ _id: userState.endpointId })
-      const universePath = `../universes/${endpoint.slug}`
+
+      await endpoint.save()
+      const universePath = `../../universes/${endpoint.slug}`
 
       let universe = null
       try {
-        universe = this.getUniverse(universePath)
+        universe = this.getUniverse(universePath, { endpoint })
       } catch (e) {
         console.trace(e.toString())
       }
@@ -125,11 +106,10 @@ class Engine {
         }
 
         const sendEmail = async (to, subject, body, attachment = '') => {
-          const transporter = nodemailer.createTransport(
-            universe.smtp.transport
-          )
+          const { from, transport } = endpoint.profile.mail
+          const transporter = nodemailer.createTransport(transport)
           const params = {
-            from: `"${universe.smtp.fromName}" <${universe.smtp.fromEmail}>`,
+            from: from.name ? `"${from.name}" <${from.email}>` : from.email,
             to,
             subject,
             text: body

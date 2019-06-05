@@ -55,36 +55,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 //   })
 // )
 socketServer.on('connection', socket => {
-  socket.on('message', async ({ slug, p, text }) => {
-    const endpoint = await Endpoint.findOne({ slug })
-
-    let reply = null
-    if (!endpoint) {
-      reply = new Message({
-        type: 'webchat',
-        to: p,
-        from: slug,
-        text: 'Oops! This number is not active. Please check and try again.'
-      })
-    } else {
-      const phone = await PhoneNumber.findOrCreateOne({
-        number: p
-      })
-      if (!phone.userId) {
-        const user = await User.create({})
-        phone.userId = user._id
-        phone.save()
-      }
-      const userState = await UserState.findOrCreateOne({
-        endpointId: endpoint._id,
-        userId: phone.userId
-      })
-
-      reply = await engine.processInboundMessage({ userState, text })
-    }
-
-    socket.emit('message', reply)
-  })
+  socket.on('message', require('./endpoints/socket/message')(socket))
 })
 
 app.get('/api/v1/messages', (req, res) => {
