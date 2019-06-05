@@ -38,9 +38,14 @@ module.exports = {
               'outstanding',
               'dope',
               'pretty good',
-              'smiling'
+              'smiling',
+              'cool',
+              'coolio',
+              'awesome',
+              'ashome',
+              "eh, i'm feeling great"
             ],
-            ok: ['ok', 'normal', 'a little low', 'hanging in there'],
+            ok: ['ok', 'normal', 'a little low', 'hanging in there', 'eh'],
             bad: [
               'bad',
               'not good',
