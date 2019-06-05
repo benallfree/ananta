@@ -1,4 +1,18 @@
 const path = require('path')
+const { differenceInYears } = require('date-fns')
+
+function shortDate(dt) {
+  return dt.toLocaleDateString('en-US')
+}
+
+function age(p) {
+  var result = differenceInYears(new Date(), p.birthDate)
+  return result
+}
+
+function yearsToRetirement(p) {
+  return Math.max(0, 65 - age(p))
+}
 
 module.exports = ({ endpoint }) => ({
   name: 'Med+Rite',
@@ -18,17 +32,41 @@ module.exports = ({ endpoint }) => ({
             `Here is your free eBook`,
             path.resolve(__dirname, 'ebook.pdf')
           )
-          goto('sent')
+          goto(
+            'sent',
+            `Great, I've sent the eBook to ${
+              profile.email
+            }. You can also view it at https://medrite.com/ebook.`
+          )
         }
       },
       routes: {
         sent: {
-          prompt: ({ profile }) =>
-            `Great, I've sent the eBook to ${
-              profile.email
-            }. You can also view it at https://medrite.com/ebook. I would like to point you to a couple videos as well, can I get your date of birth so I can choose the right ones?`,
-          run: ({ goto }) => {
-            goto('/root')
+          noop: `Sorry, I didn't get that. Please provide a birth date in the form of MM/DD/YYYY.`,
+          prompt: `I would like to point you to a couple videos, can I get your date of birth so I can choose the right ones?`,
+          run: ({ goto, profile, entities: { date } }) => {
+            if (date) {
+              profile.birthDate = date
+              goto(
+                'videos',
+                `Okay, you're ${age(
+                  profile
+                )} years old and will be eligible for Medicare in ${yearsToRetirement(
+                  profile
+                )} year(s).`
+              )
+            }
+          },
+          routes: {
+            videos: {
+              prompt: ({ profile }) =>
+                `Here are the best videos for you based on ${yearsToRetirement(
+                  profile
+                )} year(s) before Medicare age eligibility.`,
+              run: ({ goto }) => {
+                goto('..')
+              }
+            }
           }
         }
       }

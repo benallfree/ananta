@@ -54,8 +54,8 @@ class DbBase {
     _.extend(
       this,
       {
-        createdAt: new Date().getTime(),
-        updatedAt: new Date().getTime(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
         version: this.constructor.getMigrations().length
       },
       attrs
@@ -87,7 +87,7 @@ class DbBase {
   }
 
   async save() {
-    this.updatedAt = new Date().getTime()
+    this.updatedAt = new Date()
     return this.constructor
       .getCollectionRef()
       .update({ _id: this._id }, { $set: this.getAttrs() }, { upsert: true })

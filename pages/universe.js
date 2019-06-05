@@ -334,26 +334,28 @@ class Universe extends Component {
         </div>
 
         <div className="chatbox">
-          {messages.map(message => (
-            <div
-              key={message._id}
-              className={classNames({ [message.direction]: true })}
-            >
+          {messages.map(message =>
+            message.text.split(/\n/).map((m, i) => (
               <div
-                className={classNames({
-                  'talk-bubble': true,
-                  'tri-right': true,
-                  'right-in': message.direction === 'sent',
-                  'left-in': message.direction === 'received',
-                  round: true
-                })}
+                key={`${message._id}.${i}`}
+                className={classNames({ [message.direction]: true })}
               >
-                <div className="talktext">
-                  <p>{message.text}</p>
+                <div
+                  className={classNames({
+                    'talk-bubble': true,
+                    'tri-right': true,
+                    'right-in': message.direction === 'sent',
+                    'left-in': message.direction === 'received',
+                    round: true
+                  })}
+                >
+                  <div className="talktext">
+                    <p>{m}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
           <form onSubmit={this.handleSubmit}>
             <input
               onChange={this.handleChange}

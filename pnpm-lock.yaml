@@ -4,6 +4,7 @@ dependencies:
   body-parser: 1.19.0
   classnames: 2.2.6
   cross-env: 5.2.0
+  date-fns: 1.30.1
   dotenv: 8.0.0
   express: 4.17.1
   express-session: 1.16.1
@@ -3500,6 +3501,10 @@ packages:
     dev: true
     resolution:
       integrity: sha512-YTWYI9se1P55u58gL5GkQHW4P6VJBJ5iBT+B5a7i2Tjadhv52paJG0qHX4A0OR6/t52odI64KP2YvFpkDOi3eQ==
+  /date-fns/1.30.1:
+    dev: false
+    resolution:
+      integrity: sha512-hBSVCvSmWC+QypYObzwGOd9wqdDpOt+0wl0KbU+R+uuZBS1jN8VsD1ss3irQDknRj5NvxiTF6oj/nDRnN/UQNw==
   /date-now/0.1.4:
     dev: false
     resolution:
@@ -10746,6 +10751,7 @@ specifiers:
   body-parser: ^1.19.0
   classnames: ^2.2.6
   cross-env: ^5.2.0
+  date-fns: ^1.30.1
   dotenv: ^8.0.0
   eslint: ^5.16.0
   eslint-plugin-babel: ^5.3.0

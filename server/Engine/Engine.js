@@ -99,8 +99,8 @@ class Engine {
         }
 
         let nextRoutePath = userState.route
-        const goto = newRoute => {
-          chunks.push('')
+        const goto = (newRoute, flash = '') => {
+          chunks.push(flash)
           nextRoutePath = path.resolve(userState.route, newRoute)
           console.log({ nextRoutePath, newRoute })
         }
@@ -150,11 +150,17 @@ class Engine {
 
         const entities = {}
         _.each(ai.entities, e => {
-          const { entity, sourceText } = e
-          if (entity === 'email') {
-            entities.email = sourceText
+          const { entity, resolution } = e
+          switch (entity) {
+            case 'email':
+              entities.email = resolution.value
+              break
+            case 'date':
+              entities.date = new Date(resolution.date)
+              break
           }
         })
+        console.log({ entities })
 
         const userParams = {
           text,
@@ -169,6 +175,7 @@ class Engine {
 
         switch (ai.intent) {
           case 'prompt':
+            say(currentRoute.prompt(userParams))
             break
           default:
             try {
@@ -189,13 +196,14 @@ class Engine {
         }
 
         const nextRoute = universe.route(nextRoutePath)
-        say(nextRoute.prompt(userParams))
+        if (nextRoutePath != userState.route) say(nextRoute.prompt(userParams))
 
         userState.route = nextRoutePath
         save.userState = userState
 
         reply.userStateId = userState._id
-        reply.text = chunks.join(' ')
+        reply.text = chunks.join('\n')
+        console.log(reply.text)
       } else {
         userState.route = '/root'
         save.userState = userState
