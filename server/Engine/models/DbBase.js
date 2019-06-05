@@ -69,11 +69,11 @@ class DbBase {
 
   migrate() {
     const migrations = this.constructor.getMigrations()
-    _.each(migrations, (m, i) => {
-      if (m.version >= i) return
+    for (let i = this.version; i < migrations.length; i++) {
+      const m = migrations[i]
       m(this)
-      this.version = i
-    })
+    }
+    this.version = migrations.length
   }
 
   static async create(attrs) {
