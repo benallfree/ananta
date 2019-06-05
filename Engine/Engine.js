@@ -13,6 +13,8 @@ function functionalize(e) {
 
 class Engine {
   getUniverse(universePath) {
+    delete require.cache[universePath]
+
     const universe = require(universePath)
     if (universe.isInitialized) return universe
     if (!universe.noop) {
