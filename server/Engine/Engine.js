@@ -106,7 +106,6 @@ class Engine {
 
         const chunks = []
         const say = text => {
-          console.log('saying', { text })
           const filtered = spamFilter(text)
           chunks.push(filtered)
         }
@@ -138,6 +137,7 @@ class Engine {
             ]
           }
           try {
+            console.log({ transport })
             await transporter.sendMail(params)
           } catch (e) {
             console.trace(e.toString())
@@ -173,7 +173,6 @@ class Engine {
               break
           }
         })
-        console.log({ entities })
 
         const userParams = {
           text,
@@ -216,7 +215,6 @@ class Engine {
 
         reply.userStateId = userState._id
         reply.text = chunks.join('\n\n')
-        console.log(reply.text)
       } else {
         userState.route = '/root'
         save.userState = userState

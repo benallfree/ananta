@@ -1,6 +1,6 @@
 const _ = require('lodash')
 
-module.exports = {
+module.exports = ({ endpoint }) => ({
   name: 'VHAB',
   noop: 'Do you need help? Please contact VHAB at 800-444-7735.',
   routes: {
@@ -69,4 +69,4 @@ module.exports = {
       }
     }
   }
-}
+})

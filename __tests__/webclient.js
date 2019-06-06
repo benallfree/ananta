@@ -1,4 +1,4 @@
-const { servers } = require('../app')
+const { servers } = require('../server/app')
 const clientIo = require('socket.io-client')
 const { http: httpServer, socket: socketServer } = servers
 

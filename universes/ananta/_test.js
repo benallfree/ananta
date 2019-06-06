@@ -4,7 +4,6 @@ module.exports = function({ snd, rcv }) {
     await rcv('listening')
     await snd('attack')
     await rcv('loser')
-    await rcv('listening')
     await snd('look around')
     await rcv('hovering')
     await snd('foo')

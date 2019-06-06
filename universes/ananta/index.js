@@ -1,4 +1,4 @@
-module.exports = {
+module.exports = ({ endpoint }) => ({
   slug: 'ananta',
   name: 'Ananta',
   noop: 'Nothing happens.',
@@ -24,4 +24,4 @@ module.exports = {
       }
     }
   }
-}
+})

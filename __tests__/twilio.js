@@ -1,6 +1,6 @@
-import { app } from '../app'
+import { app } from '../server/app'
 import request from 'supertest'
-import { Endpoint, User, Message } from '../Engine/models'
+import { Endpoint, User, Message } from '../server/Engine/models'
 
 describe('Twilio endpoint tests', () => {
   beforeEach(async () => {

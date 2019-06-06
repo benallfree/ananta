@@ -5,17 +5,23 @@ let maildev = null
 let transporter = null
 
 const MAIL_PORT = 1025
-maildev = new MailDev({
-  smtp: MAIL_PORT
-})
 
 beforeEach(done => {
+  maildev = new MailDev({
+    smtp: MAIL_PORT,
+    incomingUser: 'test',
+    incomingPass: 'test'
+  })
   maildev.listen(done)
 
   const config = {
-    host: 'localhost',
+    host: '0.0.0.0',
     port: MAIL_PORT,
-    ignoreTLS: true
+    ignoreTLS: true,
+    auth: {
+      user: 'test',
+      pass: 'test'
+    }
   }
   transporter = nodemailer.createTransport(config)
 })

@@ -1,5 +1,5 @@
-import { Engine } from '../Engine'
-import { Message, User, Endpoint, UserState } from '../Engine/models'
+import { Engine } from '../server/Engine'
+import { Message, User, Endpoint, UserState } from '../server/Engine/models'
 import { resolve } from 'path'
 import glob from 'glob'
 import { existsSync } from 'fs'
@@ -12,7 +12,9 @@ describe('Endpoint tests', () => {
   const modules = glob.sync('*', opts)
   modules.forEach(path => {
     const universePath = resolve(rootPath, path)
-    const universeConfig = engine.getUniverse(universePath)
+    const universeConfig = engine.getUniverse(universePath, {
+      endpoint: new Endpoint()
+    })
     const name = `${universeConfig.name || path}`
 
     test(`${name} is well formed`, () => {
@@ -60,10 +62,8 @@ describe('Endpoint tests', () => {
 
       test('It should welcome a new user and prompt an existing user', async () => {
         await snd('Hello')
-        rcv(universeConfig.routes.root.prompt())
+        rcv(universeConfig.routes.root.prompt({ profile: userState.profile }))
         nrcv(universeConfig.noop())
-        await snd('Hello')
-        rcv(universeConfig.route(userState.route).noop())
         await snd('prompt')
         nrcv(universeConfig.route(userState.route).noop())
       })

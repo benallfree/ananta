@@ -56,7 +56,7 @@ class DbBase {
       {
         createdAt: new Date(),
         updatedAt: new Date(),
-        version: this.constructor.getMigrations().length
+        version: 0
       },
       attrs
     )

@@ -1,4 +1,4 @@
-import { app } from '../app'
+import { app } from '../server/app'
 import request from 'supertest'
 
 test('It should have a ping method', async () => {
