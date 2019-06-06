@@ -13,6 +13,17 @@ function functionalize(e) {
 
 console.log('Loading Engine module')
 
+function spamFilter(text) {
+  const replacements = {
+    'Medi-care': /Medicare/i,
+    'el!g!bility': /eligibility/i,
+    'el!g!ble': /eligible/i
+  }
+  let ret = text
+  _.each(replacements, (v, k) => (ret = ret.replace(v, k)))
+  return ret
+}
+
 class Engine {
   getUniverse(universePath, args) {
     const universe = require(universePath)(args)
@@ -95,12 +106,14 @@ class Engine {
 
         const chunks = []
         const say = text => {
-          chunks.push(text)
+          console.log('saying', { text })
+          const filtered = spamFilter(text)
+          chunks.push(filtered)
         }
 
         let nextRoutePath = userState.route
         const goto = (newRoute, flash = '') => {
-          chunks.push(flash)
+          say(flash)
           nextRoutePath = path.resolve(userState.route, newRoute)
           console.log({ nextRoutePath, newRoute })
         }
@@ -191,7 +204,7 @@ class Engine {
               })`
             }
             if (chunks.length === 0) {
-              chunks.push(currentRoute.noop(userParams))
+              say(currentRoute.noop(userParams))
             }
         }
 
@@ -202,7 +215,7 @@ class Engine {
         save.userState = userState
 
         reply.userStateId = userState._id
-        reply.text = chunks.join('\n')
+        reply.text = chunks.join('\n\n')
         console.log(reply.text)
       } else {
         userState.route = '/root'
