@@ -1,29 +1,12 @@
 const app = require('express')()
 const next = require('next')
-import { resolve } from 'path'
-import twilio from 'twilio'
 import { config } from 'dotenv'
 import bodyParser from 'body-parser'
-import { Engine } from './Engine'
-import {
-  Message,
-  Endpoint,
-  User,
-  PhoneNumber,
-  UserState
-} from './Engine/models'
-var sharedsession = require('express-socket.io-session')
+import { Endpoint } from './Engine/models'
 const httpServer = require('http').Server(app)
 const socketServer = require('socket.io')(httpServer)
 
 config()
-
-const client = new twilio(
-  process.env.TWILIO_API_KEY,
-  process.env.TWILIO_API_SECRET
-)
-
-const engine = new Engine()
 
 const dev = process.env.NODE_ENV !== 'production'
 const nextApp = next({ dev })
@@ -68,47 +51,7 @@ app.get('/api/v1/universes', async (req, res) => {
   res.json(universes)
 })
 
-app.post('/v1/twilio/sms/inbound', async (req, res) => {
-  const { From, To, Body } = req.body
-  let ret = null
-
-  const endpoint = await Endpoint.findOne({ number: To })
-  if (!endpoint) {
-    ret = new Message({
-      type: 'webchat',
-      to: From,
-      from: To,
-      text: 'Oops! This number is not active. Please check and try again.'
-    })
-  } else {
-    const phone = await PhoneNumber.findOrCreateOne({
-      number: From
-    })
-    if (!phone.userId) {
-      const user = await User.create({})
-      phone.userId = user._id
-      phone.save()
-    }
-    const userState = await UserState.findOrCreateOne({
-      endpointId: endpoint._id,
-      userId: phone.userId
-    })
-
-    ret = await engine.processInboundMessage({ userState, text: Body })
-  }
-
-  if (process.env.NODE_ENV !== 'test') {
-    client.messages.create({
-      body: ret.text,
-      to: From,
-      from: To
-    })
-  }
-
-  res.writeHead(200, { 'Content-Type': 'application/json' })
-  res.write(JSON.stringify(ret.text))
-  res.end()
-})
+app.post('/v1/twilio/sms/inbound', require('./endpoints/twilio/inbound'))
 
 app.get('/ping', (req, res) => {
   res.write('pong')

@@ -20,6 +20,7 @@ function watchModules(watchPath) {
 }
 watchModules(path.resolve(__dirname, 'Engine'))
 watchModules(path.resolve(__dirname, '../universes'))
+watchModules(path.resolve(__dirname, 'endpoints'))
 ;(async () => {
   await nextApp.prepare()
 
