@@ -55,7 +55,7 @@
     "nedb": "^1.8.0",
     "nedb-promise": "^2.0.1",
     "nedb-session-store": "^1.1.2",
-    "next": "^8.1.1-canary.34",
+    "next": "^9.3.3",
     "node-nlp": "^3.1.1",
     "nodemailer": "^6.2.1",
     "react": "^16.8.6",
